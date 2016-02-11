@@ -5,7 +5,6 @@ import java.net.ServerSocket;
 import java.net.Socket;
 import java.util.LinkedList;
 import java.util.List;
-import java.util.Scanner;
 
 public class Server implements AutoCloseable {
 
@@ -13,9 +12,9 @@ public class Server implements AutoCloseable {
 
 	private ServerSocket serverSocket = null;
 
-	private String logFileName;
-
 	private List<ClientConnectionThread> clients = new LinkedList<>();
+
+	private Logger logger;
 
 	public int getServerPort() {
 		return SERVER_PORT;
@@ -24,40 +23,25 @@ public class Server implements AutoCloseable {
 	public Server(int port, String logFileName) throws IOException {
 		this.SERVER_PORT = port;
 		this.serverSocket = new ServerSocket(port);
-		this.logFileName = logFileName;
+		this.logger = new Logger(logFileName);
 
 	}
 
-	public void start() throws IOException {
-
-		Scanner sc = new Scanner(System.in);
-		System.out.println("Server has started, waiting for clients");
-		System.out.println("Type showall to view all clients, type stop to stop the server.");
+	public void start() {
 
 		while (true) {
-			String input = sc.nextLine();
-			if (input.equals("showall")) {
-				printAllConnectedClients();
-			}
-			if (input.equals("stop")) {
-				break;
-			}
-			Socket socket = serverSocket.accept();
-			ClientConnectionThread client = new ClientConnectionThread(socket, logFileName);
-			clients.add(client);
-			client.setDaemon(true);
-			client.start();
-		}
-		sc.close();
-	}
 
-	public void printAllConnectedClients() {
-		if (clients.size() == 0) {
-			System.out.println("No clients currently connected.");
-			return;
-		}
-		for (ClientConnectionThread client : this.clients) {
-			System.out.println(client.getSocket() + " is currently connected.");
+			Socket socket = null;
+			try {
+				socket = serverSocket.accept();
+				ClientConnectionThread client = new ClientConnectionThread(socket, logger);
+				clients.add(client);
+				client.setDaemon(true);
+				client.start();
+			} catch (IOException e) {
+				// TODO Auto-generated catch block
+				e.printStackTrace();
+			}
 		}
 	}
 
@@ -79,17 +63,16 @@ public class Server implements AutoCloseable {
 
 	public static void main(String[] args) {
 		final int PORT = 8000;
-		final String LOG_FILE = "test.log";
-
-		try (Server server = new Server(PORT, LOG_FILE))
-
-		{
+		final String LOGFILE = "log.txt";
+		Server server;
+		try {
+			server = new Server(PORT, LOGFILE);
 			server.start();
-
-		} catch (Exception e) {
-			System.err.println("An error has occured. " + e.getMessage());
+		} catch (IOException e) {
+			// TODO Auto-generated catch block
 			e.printStackTrace();
 		}
-		System.out.println("Server stopped.");
+
+		// System.out.println("Server stopped.");
 	}
 }

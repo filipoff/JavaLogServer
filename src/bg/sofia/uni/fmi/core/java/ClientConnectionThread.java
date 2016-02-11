@@ -1,66 +1,41 @@
 package bg.sofia.uni.fmi.core.java;
 
 import java.io.BufferedReader;
-import java.io.FileNotFoundException;
-import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.InputStreamReader;
-import java.io.PrintWriter;
 import java.net.Socket;
-import java.text.SimpleDateFormat;
-import java.util.Calendar;
 
 public class ClientConnectionThread extends Thread {
 
 	private Socket socket;
+	private Logger logger;
 
-	private String logFileName;
-
-	private static final SimpleDateFormat TIME_STAMP_FORMAT = new SimpleDateFormat("yyyy.MM.dd HH:mm:ss.SSS");
-
-	public ClientConnectionThread(Socket socket, String logfileName) {
+	public ClientConnectionThread(Socket socket, Logger logger) {
 		this.socket = socket;
-		this.logFileName = logfileName;
-	}
-
-	public Socket getSocket() {
-		return socket;
-	}
-
-	private void writeToLog(String message) throws FileNotFoundException {
-		Calendar now = Calendar.getInstance();
-
-		String timeStamp = TIME_STAMP_FORMAT.format(now.getTime());
-
-		FileOutputStream logFileOS = new FileOutputStream(this.logFileName, true);
-
-		PrintWriter logFileWriter = new PrintWriter(logFileOS);
-
-		logFileWriter.println(timeStamp + " " + java.lang.management.ManagementFactory.getRuntimeMXBean().getName()
-				+ " : " + message);
-
-		logFileWriter.flush();
-		logFileWriter.close();
-
+		this.logger = logger;
 	}
 
 	@Override
 	public void run() {
 		try (BufferedReader reader = new BufferedReader(new InputStreamReader(socket.getInputStream()))) {
 
-			while (true) {
+			String name = reader.readLine();
 
-				String message = reader.readLine();
+			if (name == null) {
+				stopThread();
+				return;
+			}
 
-				if (message == null) {
-					break;
-				}
-				writeToLog(message);
+			String message = null;
+
+			while ((message = reader.readLine()) != null) {
+				logger.writeToLog(name, message);
 			}
 
 		} catch (IOException e) {
 			// TODO Auto-generated catch block
-			e.printStackTrace();
+			// e.printStackTrace();
+
 		}
 	}
 
@@ -69,7 +44,7 @@ public class ClientConnectionThread extends Thread {
 			try {
 				socket.close();
 			} catch (IOException e) {
-				// Nothing that we can do
+				e.printStackTrace();
 			}
 		}
 	}
