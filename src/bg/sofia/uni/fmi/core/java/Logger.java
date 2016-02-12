@@ -23,17 +23,17 @@ public class Logger {
 		@Override
 		public void run() {
 
-			FileOutputStream logFileOS = null;
-			try {
-				logFileOS = new FileOutputStream(logFileName, true);
-				PrintWriter logFileWriter = new PrintWriter(logFileOS);
+			try (FileOutputStream logFileOS = new FileOutputStream(logFileName, true);
+					PrintWriter logFileWriter = new PrintWriter(logFileOS)) {
 				while (true) {
 
 					synchronized (messages) {
 						messages.wait();
 						String message = null;
 						while ((message = messages.poll()) != null) {
+							System.out.println("Logger thread is writing \"" + message + "\" to file.");
 							logFileWriter.println(message);
+							logFileWriter.flush();
 						}
 					}
 				}
@@ -41,15 +41,6 @@ public class Logger {
 			} catch (IOException | InterruptedException e) {
 				// TODO Auto-generated catch block
 				e.printStackTrace();
-			} finally {
-				if (logFileOS != null) {
-					try {
-						logFileOS.close();
-					} catch (IOException e) {
-						// TODO Auto-generated catch block
-						e.printStackTrace();
-					}
-				}
 			}
 		}
 	}
@@ -61,11 +52,12 @@ public class Logger {
 		loggerThread.start();
 	}
 
-	public synchronized void writeToLog(String name, String message) {
+	public void writeToLog(String name, String message) {
 
 		Calendar now = Calendar.getInstance();
 
 		String timeStamp = TIME_STAMP_FORMAT.format(now.getTime());
+
 		synchronized (messages) {
 			messages.add(timeStamp + " " + name + ": " + message);
 			messages.notify();

@@ -26,8 +26,10 @@ public class MessageSender {
 						messages.wait();
 						String message = null;
 						while ((message = messages.poll()) != null) {
+							System.out.println("Message sender thread is sending \"" + message + "\" to server.");
 							out.println(message);
 							out.flush();
+
 						}
 					}
 				}
@@ -46,7 +48,7 @@ public class MessageSender {
 		messageSenderThread.start();
 	}
 
-	public synchronized void send(String message) {
+	public void send(String message) {
 
 		synchronized (messages) {
 			messages.add(message);

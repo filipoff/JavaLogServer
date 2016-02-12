@@ -31,12 +31,12 @@ public class Server implements AutoCloseable {
 
 		while (true) {
 
-			Socket socket = null;
+			Socket clientSocket = null;
 			try {
-				socket = serverSocket.accept();
-				ClientConnectionThread client = new ClientConnectionThread(socket, logger);
+				clientSocket = serverSocket.accept();
+				ClientConnectionThread client = new ClientConnectionThread(clientSocket, logger);
 				clients.add(client);
-				client.setDaemon(true);
+				//client.setDaemon(true);
 				client.start();
 			} catch (IOException e) {
 				// TODO Auto-generated catch block

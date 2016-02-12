@@ -24,11 +24,11 @@ public class Client {
 		this.name = name;
 	}
 
-	public void connect() {
+	public void connect() throws InterruptedException {
 		try {
 			this.socket = new Socket(host, port);
 			this.messageSender = new MessageSender(socket);
-			this.messageSender.send(name);
+			this.sendMessage(name);
 		} catch (UnknownHostException e) {
 			// TODO Auto-generated catch block
 			e.printStackTrace();

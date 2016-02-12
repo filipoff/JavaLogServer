@@ -18,23 +18,25 @@ public class ClientConnectionThread extends Thread {
 	@Override
 	public void run() {
 		try (BufferedReader reader = new BufferedReader(new InputStreamReader(socket.getInputStream()))) {
-
-			String name = reader.readLine();
-
+			
+			String name = null;
+			name = reader.readLine();
 			if (name == null) {
 				stopThread();
+				System.out.println("Name of " + socket + " not recieved.");
 				return;
 			}
-
+			
 			String message = null;
 
 			while ((message = reader.readLine()) != null) {
+				System.out.println("Message \"" + message + "\" recieved from client.");
 				logger.writeToLog(name, message);
 			}
 
 		} catch (IOException e) {
 			// TODO Auto-generated catch block
-			// e.printStackTrace();
+			e.printStackTrace();
 
 		}
 	}
