@@ -24,7 +24,7 @@ public class Client {
 		this.name = name;
 	}
 
-	public void connect() throws InterruptedException {
+	public void connect() {
 		try {
 			this.socket = new Socket(host, port);
 			this.messageSender = new MessageSender(socket);
@@ -46,7 +46,7 @@ public class Client {
 	public void disconnect() {
 
 		if (this.messageSender != null) {
-			this.messageSender.close();
+			this.messageSender.stop();
 		}
 
 		if (this.socket != null)

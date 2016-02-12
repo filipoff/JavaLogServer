@@ -64,7 +64,13 @@ public class Logger {
 		}
 	}
 
-	public void close() {
+	public void stop() {
+		try {
+			loggerThread.join();
+		} catch (InterruptedException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
 		loggerThread.interrupt();
 	}
 

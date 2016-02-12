@@ -34,9 +34,9 @@ public class Server implements AutoCloseable {
 			Socket clientSocket = null;
 			try {
 				clientSocket = serverSocket.accept();
-				ClientConnectionThread client = new ClientConnectionThread(clientSocket, logger);
+				ClientConnectionThread client = new ClientConnectionThread(clientSocket, logger, clients);
 				clients.add(client);
-				//client.setDaemon(true);
+				// client.setDaemon(true);
 				client.start();
 			} catch (IOException e) {
 				// TODO Auto-generated catch block

@@ -34,7 +34,9 @@ public class MessageSender {
 					}
 				}
 
-			} catch (IOException | InterruptedException e) {
+			} catch (InterruptedException e1) {
+				System.out.println("Message sender thread was stopped.");
+			} catch (IOException e) {
 				// TODO Auto-generated catch block
 				e.printStackTrace();
 			}
@@ -56,7 +58,13 @@ public class MessageSender {
 		}
 	}
 
-	public void close() {
+	public void stop() {
+		try {
+			messageSenderThread.join();
+		} catch (InterruptedException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
 		messageSenderThread.interrupt();
 	}
 }
