@@ -27,25 +27,23 @@ public class ClientConnectionThread extends Thread {
 			name = reader.readLine();
 			if (name == null) {
 				stopThread();
-				System.out.println("Name of " + socket + " not recieved.");
+				System.out.println("Name of client with " + socket + " could not be recieved.");
 				return;
 			}
 
 			String message = null;
 
 			while ((message = reader.readLine()) != null) {
-				System.out.println("Message \"" + message + "\" recieved from client.");
+				System.out.println("Message \"" + message + "\" recieved from client : " + name);
 				logger.writeToLog(name, message);
-				if (!socket.isConnected()) {
-					System.out.println(socket + " has disconnected.");
-					this.threads.remove(this);
-				}
 			}
+			System.out.println(socket + " has disconnected.");
+			threads.remove(this);
 
 		} catch (SocketException e1) {
 			System.out.println("Lost connection from " + socket);
 			stopThread();
-			this.threads.remove(this);
+			threads.remove(this);
 		} catch (IOException e) {
 			// TODO Auto-generated catch block
 			e.printStackTrace();

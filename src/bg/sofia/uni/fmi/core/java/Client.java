@@ -2,7 +2,6 @@ package bg.sofia.uni.fmi.core.java;
 
 import java.io.IOException;
 import java.net.Socket;
-import java.net.UnknownHostException;
 
 public class Client {
 
@@ -24,36 +23,27 @@ public class Client {
 		this.name = name;
 	}
 
-	public void connect() {
-		try {
-			this.socket = new Socket(host, port);
-			this.messageSender = new MessageSender(socket);
-			this.sendMessage(name);
-		} catch (UnknownHostException e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
-		} catch (IOException e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
-		}
+	public void connect() throws IOException {
+		socket = new Socket(host, port);
+		messageSender = new MessageSender(socket);
+		sendMessage(name);
 
 	}
 
 	public void sendMessage(String message) {
-		this.messageSender.send(message);
+		messageSender.send(message);
 	}
 
 	public void disconnect() {
 
-		if (this.messageSender != null) {
-			this.messageSender.stop();
+		if (messageSender != null) {
+			System.out.println("disconnect called from " + name);
+			messageSender.stop();
 		}
 
-		if (this.socket != null)
-
-		{
+		if (socket != null) {
 			try {
-				this.socket.close();
+				socket.close();
 			} catch (IOException e) {
 				// TODO Auto-generated catch block
 				e.printStackTrace();

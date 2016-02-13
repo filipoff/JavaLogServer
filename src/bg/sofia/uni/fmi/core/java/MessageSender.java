@@ -25,15 +25,14 @@ public class MessageSender {
 					synchronized (messages) {
 						messages.wait();
 						String message = null;
+
 						while ((message = messages.poll()) != null) {
 							System.out.println("Message sender thread is sending \"" + message + "\" to server.");
 							out.println(message);
 							out.flush();
-
 						}
 					}
 				}
-
 			} catch (InterruptedException e1) {
 				System.out.println("Message sender thread was stopped.");
 			} catch (IOException e) {
@@ -47,7 +46,7 @@ public class MessageSender {
 		this.socket = socket;
 		this.messages = new LinkedList<>();
 		this.messageSenderThread = new MessageSenderThread();
-		messageSenderThread.start();
+		this.messageSenderThread.start();
 	}
 
 	public void send(String message) {

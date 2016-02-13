@@ -1,78 +1,76 @@
 package bg.sofia.uni.fmi.core.java;
 
+import java.io.IOException;
+import java.util.ArrayList;
+import java.util.List;
+
 public class Tester {
 
-	public static void main(String[] args) throws InterruptedException {
+	private int messageCount;
 
-		Client client1 = new Client("localhost", 8000, "Tester1");
-		client1.connect();
-		Client client2 = new Client("localhost", 8000, "Tester2");
-		client2.connect();
-		Client client3 = new Client("localhost", 8000, "Tester3");
-		client3.connect();
-		Client client4 = new Client("localhost", 8000, "Tester4");
-		client4.connect();
-		Client client5 = new Client("localhost", 8000, "Tester5");
-		client5.connect();
+	private List<TesterThread> threads;
 
-		Thread t1 = new Thread() {
-			public void run() {
+	private class TesterThread extends Thread {
 
-				for (int i = 0; i < 100; i++) {
-					client1.sendMessage("msg " + i);
+		private Client client;
+		private String name;
+
+		public TesterThread(String name) {
+			this.name = name;
+			this.client = new Client("localhost", 8000, name);
+		}
+
+		@Override
+		public void run() {
+
+			try {
+				client.connect();
+
+				for (int i = 0; i < messageCount; i++) {
+					client.sendMessage("msg " + i);
 				}
+
+				client.disconnect();
+			} catch (IOException e) {
+				// TODO Auto-generated catch block
+				System.out.println("Client " + name + " could not connect to server.");
+				// e.printStackTrace();
 			}
-		};
 
-		Thread t2 = new Thread() {
-			public void run() {
+		}
 
-				for (int i = 0; i < 100; i++) {
-					client2.sendMessage("msg " + i);
-				}
-			}
-		};
+	}
 
-		Thread t3 = new Thread() {
-			public void run() {
+	public Tester(int threadCount, int messageCount) {
+		this.messageCount = messageCount;
+		this.threads = new ArrayList<>();
 
-				for (int i = 0; i < 100; i++) {
-					client3.sendMessage("msg " + i);
-				}
-			}
-		};
+		for (int i = 1; i <= threadCount; i++) {
+			TesterThread thread = new TesterThread("Tester" + i);
+			threads.add(thread);
+		}
+	}
 
-		Thread t4 = new Thread() {
-			public void run() {
+	private void startTest() throws InterruptedException {
 
-				for (int i = 0; i < 100; i++) {
-					client4.sendMessage("msg " + i);
-				}
-			}
-		};
+		for (Thread thread : threads) {
+			thread.start();
+		}
+		for (Thread thread : threads) {
+			thread.join();
+		}
+	}
 
-		Thread t5 = new Thread() {
-			public void run() {
+	public static void main(String[] args) {
 
-				for (int i = 0; i < 100; i++) {
-					client5.sendMessage("msg " + i);
-				}
-			}
-		};
-		t1.start();
-		t2.start();
-		t3.start();
-		t4.start();
-		t5.start();
-		t1.join();
-		t2.join();
-		t3.join();
-		t4.join();
-		t5.join();
-		client1.disconnect();
-		client2.disconnect();
-		client3.disconnect();
-		client4.disconnect();
-		client5.disconnect();
+		final int CLIENT_COUNT = 5;
+		final int MESSAGE_COUNT = 10;
+		Tester tester = new Tester(CLIENT_COUNT, MESSAGE_COUNT);
+		try {
+			tester.startTest();
+		} catch (InterruptedException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
 	}
 }

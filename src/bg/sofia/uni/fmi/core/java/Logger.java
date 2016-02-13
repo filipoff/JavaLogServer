@@ -33,6 +33,7 @@ public class Logger {
 						while ((message = messages.poll()) != null) {
 							System.out.println("Logger thread is writing \"" + message + "\" to file.");
 							logFileWriter.println(message);
+							// no flush?
 							logFileWriter.flush();
 						}
 					}
@@ -49,7 +50,7 @@ public class Logger {
 		this.logFileName = logFileName;
 		this.messages = new LinkedList<>();
 		this.loggerThread = new LoggerThread();
-		loggerThread.start();
+		this.loggerThread.start();
 	}
 
 	public void writeToLog(String name, String message) {

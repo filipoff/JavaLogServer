@@ -20,9 +20,15 @@ public class Server implements AutoCloseable {
 		return SERVER_PORT;
 	}
 
-	public Server(int port, String logFileName) throws IOException {
+	// should it throw exception?
+	public Server(int port, String logFileName) {
 		this.SERVER_PORT = port;
-		this.serverSocket = new ServerSocket(port);
+		try {
+			this.serverSocket = new ServerSocket(port);
+		} catch (IOException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
 		this.logger = new Logger(logFileName);
 
 	}
@@ -36,7 +42,6 @@ public class Server implements AutoCloseable {
 				clientSocket = serverSocket.accept();
 				ClientConnectionThread client = new ClientConnectionThread(clientSocket, logger, clients);
 				clients.add(client);
-				// client.setDaemon(true);
 				client.start();
 			} catch (IOException e) {
 				// TODO Auto-generated catch block
@@ -64,14 +69,8 @@ public class Server implements AutoCloseable {
 	public static void main(String[] args) {
 		final int PORT = 8000;
 		final String LOGFILE = "log.txt";
-		Server server;
-		try {
-			server = new Server(PORT, LOGFILE);
-			server.start();
-		} catch (IOException e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
-		}
+		Server server = new Server(PORT, LOGFILE);
+		server.start();
 
 		// System.out.println("Server stopped.");
 	}
