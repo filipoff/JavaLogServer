@@ -1,8 +1,8 @@
 package bg.sofia.uni.fmi.core.java;
 
-import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Random;
 
 public class Tester {
 
@@ -13,29 +13,36 @@ public class Tester {
 	private class TesterThread extends Thread {
 
 		private Client client;
-		private String name;
 
 		public TesterThread(String name) {
-			this.name = name;
 			this.client = new Client("localhost", 8000, name);
 		}
 
 		@Override
 		public void run() {
 
-			try {
-				client.connect();
+			Random rand = new Random();
 
-				for (int i = 0; i < messageCount; i++) {
-					client.sendMessage("msg " + i);
+			for (int i = 0; i < messageCount; i++) {
+				int interval = rand.nextInt(10001);
+				try {
+					Thread.sleep(interval);
+				} catch (InterruptedException e) {
+					// TODO Auto-generated catch block
+					e.printStackTrace();
 				}
-
-				client.disconnect();
-			} catch (IOException e) {
-				// TODO Auto-generated catch block
-				System.out.println("Client " + name + " could not connect to server.");
-				// e.printStackTrace();
+				client.sendMessage("message " + i);
 			}
+
+			while (client.pendingMessagesCount() > 0) {
+				try {
+					Thread.sleep(500);
+				} catch (InterruptedException e) {
+					// TODO Auto-generated catch block
+					e.printStackTrace();
+				}
+			}
+			client.disconnect();
 
 		}
 
@@ -63,8 +70,8 @@ public class Tester {
 
 	public static void main(String[] args) {
 
-		final int CLIENT_COUNT = 5;
-		final int MESSAGE_COUNT = 10;
+		final int CLIENT_COUNT = 10;
+		final int MESSAGE_COUNT = 20;
 		Tester tester = new Tester(CLIENT_COUNT, MESSAGE_COUNT);
 		try {
 			tester.startTest();

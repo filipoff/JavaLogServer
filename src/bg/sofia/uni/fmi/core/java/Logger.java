@@ -20,28 +20,49 @@ public class Logger {
 
 	private class LoggerThread extends Thread {
 
+		private PrintWriter logFileWriter;
+		private boolean shouldFlush = false;
+
+		public void flush() {
+			synchronized (messages) {
+				shouldFlush = true;
+				messages.notify();
+			}
+		}
+
 		@Override
 		public void run() {
 
-			try (FileOutputStream logFileOS = new FileOutputStream(logFileName, true);
-					PrintWriter logFileWriter = new PrintWriter(logFileOS)) {
+			logFileWriter = null;
+			try {
+				logFileWriter = new PrintWriter(new FileOutputStream(logFileName, true));
 				while (true) {
 
 					synchronized (messages) {
-						messages.wait();
+
 						String message = null;
+
 						while ((message = messages.poll()) != null) {
 							System.out.println("Logger thread is writing \"" + message + "\" to file.");
 							logFileWriter.println(message);
 							// no flush?
-							logFileWriter.flush();
+							// logFileWriter.flush();
 						}
+						if (shouldFlush == true) {
+							logFileWriter.flush();
+							shouldFlush = false;
+						}
+						messages.wait();
 					}
 				}
 
 			} catch (IOException | InterruptedException e) {
 				// TODO Auto-generated catch block
 				e.printStackTrace();
+			} finally {
+				if (logFileWriter != null) {
+					logFileWriter.close();
+				}
 			}
 		}
 	}
@@ -65,14 +86,14 @@ public class Logger {
 		}
 	}
 
+	public void flush() {
+		loggerThread.flush();
+	}
+
 	public void stop() {
-		try {
-			loggerThread.join();
-		} catch (InterruptedException e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
+		synchronized (messages) {
+			loggerThread.interrupt();
 		}
-		loggerThread.interrupt();
 	}
 
 }

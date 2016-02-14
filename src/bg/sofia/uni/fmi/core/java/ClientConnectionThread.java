@@ -39,6 +39,10 @@ public class ClientConnectionThread extends Thread {
 			}
 			System.out.println(socket + " has disconnected.");
 			threads.remove(this);
+			System.out.println("Number of clients currently connected: " + threads.size());
+			if (threads.size() == 0) {
+				logger.flush();
+			}
 
 		} catch (SocketException e1) {
 			System.out.println("Lost connection from " + socket);

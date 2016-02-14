@@ -35,6 +35,7 @@ public class Server implements AutoCloseable {
 
 	public void start() {
 
+		System.out.println("Server started. Waiting for clients.");
 		while (true) {
 
 			Socket clientSocket = null;
