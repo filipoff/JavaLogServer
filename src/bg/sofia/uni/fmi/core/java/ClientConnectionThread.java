@@ -10,8 +10,12 @@ import java.util.List;
 public class ClientConnectionThread extends Thread {
 
 	private Socket socket;
+
 	private Logger logger;
+
 	private List<ClientConnectionThread> threads;
+
+	private boolean frequentFlush = false;
 
 	public ClientConnectionThread(Socket socket, Logger logger, List<ClientConnectionThread> threads) {
 		this.socket = socket;
@@ -36,10 +40,15 @@ public class ClientConnectionThread extends Thread {
 			while ((message = reader.readLine()) != null) {
 				System.out.println("Message \"" + message + "\" recieved from client : " + name);
 				logger.writeToLog(name, message);
+				if (frequentFlush) {
+					logger.flush();
+				}
 			}
+
 			System.out.println(socket + " has disconnected.");
 			threads.remove(this);
 			System.out.println("Number of clients currently connected: " + threads.size());
+
 			if (threads.size() == 0) {
 				logger.flush();
 			}

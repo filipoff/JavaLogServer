@@ -72,7 +72,16 @@ public class Server implements AutoCloseable {
 		final String LOGFILE = "log.txt";
 		Server server = new Server(PORT, LOGFILE);
 		server.start();
-
-		// System.out.println("Server stopped.");
+		// Scanner scanner = new Scanner(System.in);
+		// String input = null;
+		// while (true) {
+		// input = scanner.nextLine();
+		// if (input.equals("stop")) {
+		// break;
+		// }
+		// }
+		// server.close();
+		// scanner.close();
+		System.out.println("Server stopped.");
 	}
 }

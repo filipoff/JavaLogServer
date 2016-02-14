@@ -36,23 +36,29 @@ public class Logger {
 			logFileWriter = null;
 			try {
 				logFileWriter = new PrintWriter(new FileOutputStream(logFileName, true));
+
 				while (true) {
+
+					String message = null;
 
 					synchronized (messages) {
 
-						String message = null;
+						message = messages.poll();
 
-						while ((message = messages.poll()) != null) {
-							System.out.println("Logger thread is writing \"" + message + "\" to file.");
-							logFileWriter.println(message);
-							// no flush?
-							// logFileWriter.flush();
+						if (message == null) {
+
+							if (shouldFlush == true) {
+								logFileWriter.flush();
+								shouldFlush = false;
+							}
+							messages.wait();
+							message = messages.poll();
 						}
-						if (shouldFlush == true) {
-							logFileWriter.flush();
-							shouldFlush = false;
-						}
-						messages.wait();
+					}
+
+					if (message != null) {
+						System.out.println("Logger thread is writing \"" + message + "\" to file.");
+						logFileWriter.println(message);
 					}
 				}
 

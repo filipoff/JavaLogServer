@@ -40,26 +40,40 @@ public class Client {
 		public void run() {
 
 			try {
+
 				while (true) {
+
 					try {
+
 						connect();
+
 						while (true) {
+
+							String message = null;
 							synchronized (messages) {
-
-								String message = null;
-
-								while ((message = messages.poll()) != null) {
-									System.out.println("Message sender thread is sending \"" + message
-											+ "\" to server from client " + name);
-									out.println(message);
-									out.flush();
+								message = messages.peek();
+								if (message == null) {
+									messages.wait();
+								}
+							}
+							if (message != null) {
+								out.println(message);
+								if (out.checkError()) {
+									throw new IOException("Error sending message from client " + name);
+								}
+								synchronized (messages) {
+									messages.poll();
 									messagesCounter.decrementAndGet();
 								}
-								messages.wait();
+								System.out.println(
+										"Message sender thread sent \"" + message + "\" to server from client " + name);
 							}
 						}
 					} catch (IOException e) {
+						
+						System.out.println("IO exception in client " + name + ", reconnecting.");
 						Thread.sleep(500);
+
 					} finally {
 						if (out != null) {
 							out.close();

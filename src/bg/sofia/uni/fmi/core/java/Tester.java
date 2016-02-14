@@ -24,7 +24,7 @@ public class Tester {
 			Random rand = new Random();
 
 			for (int i = 0; i < messageCount; i++) {
-				int interval = rand.nextInt(10001);
+				int interval = rand.nextInt(1000);
 				try {
 					Thread.sleep(interval);
 				} catch (InterruptedException e) {
@@ -60,18 +60,21 @@ public class Tester {
 
 	private void startTest() throws InterruptedException {
 
+		int counter = 0;
 		for (Thread thread : threads) {
 			thread.start();
 		}
 		for (Thread thread : threads) {
 			thread.join();
+			counter++;
 		}
+		System.out.println("Number of joined threads : " + counter);
 	}
 
 	public static void main(String[] args) {
 
 		final int CLIENT_COUNT = 10;
-		final int MESSAGE_COUNT = 20;
+		final int MESSAGE_COUNT = 100;
 		Tester tester = new Tester(CLIENT_COUNT, MESSAGE_COUNT);
 		try {
 			tester.startTest();
@@ -79,5 +82,6 @@ public class Tester {
 			// TODO Auto-generated catch block
 			e.printStackTrace();
 		}
+		System.out.println("final reached.");
 	}
 }
